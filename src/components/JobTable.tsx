@@ -5,14 +5,16 @@ import { JobStatus } from "@prisma/client";
 import { updateJobStatus, deleteJob } from "@/app/actions";
 import { Trash2, ExternalLink, FileText, MessageSquare, X } from "lucide-react";
 
-export default function JobTable({ jobs }: { jobs: any[] }) {
+export default function JobTable({ jobs, isAuth }: { jobs: any[]; isAuth: boolean }) {
   const [selectedComment, setSelectedComment] = useState<string | null>(null);
 
   async function handleStatusChange(id: string, newStatus: string) {
+    if (!isAuth) return;
     await updateJobStatus(id, newStatus as JobStatus);
   }
 
   async function handleDelete(id: string) {
+    if (!isAuth) return;
     if (confirm("Are you sure you want to delete this job?")) {
       await deleteJob(id);
     }
@@ -21,7 +23,7 @@ export default function JobTable({ jobs }: { jobs: any[] }) {
   if (jobs.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-lg">
-        <p className="text-slate-500 dark:text-slate-400 text-base font-medium">No applications yet. Add your first job application!</p>
+        <p className="text-slate-500 dark:text-slate-400 text-base font-medium">No applications found.</p>
       </div>
     );
   }
@@ -42,7 +44,7 @@ export default function JobTable({ jobs }: { jobs: any[] }) {
               <th className="px-2 py-3 w-[7%]">Links</th>
               <th className="px-2 py-3 w-[11%]">Status</th>
               <th className="px-2 py-3 w-[10%]">Notes</th>
-              <th className="px-2 py-3 w-[6%] text-right">Action</th>
+              {isAuth && <th className="px-2 py-3 w-[6%] text-right">Action</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200 text-xs">
@@ -74,8 +76,11 @@ export default function JobTable({ jobs }: { jobs: any[] }) {
                 <td className="px-2 py-3 truncate">
                   <select
                     value={job.status}
+                    disabled={!isAuth}
                     onChange={(e) => handleStatusChange(job.id, e.target.value)}
-                    className={`text-[11px] font-bold px-1.5 py-1 rounded border focus:outline-none cursor-pointer shadow-sm w-full ${
+                    className={`text-[11px] font-bold px-1.5 py-1 rounded border focus:outline-none shadow-sm w-full ${
+                      !isAuth ? "opacity-90 cursor-not-allowed bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700" : "cursor-pointer"
+                    } ${
                       job.status === "APPLIED" ? "bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-700" :
                       job.status === "INTERVIEWING" ? "bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700" :
                       job.status === "OFFERED" ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700" :
@@ -103,15 +108,17 @@ export default function JobTable({ jobs }: { jobs: any[] }) {
                     <span className="text-slate-400 text-[11px]">None</span>
                   )}
                 </td>
-                <td className="px-2 py-3 text-right truncate">
-                  <button
-                    onClick={() => handleDelete(job.id)}
-                    className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/20 transition-all inline-flex justify-center"
-                    title="Delete Job"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
+                {isAuth && (
+                  <td className="px-2 py-3 text-right truncate">
+                    <button
+                      onClick={() => handleDelete(job.id)}
+                      className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/20 transition-all inline-flex justify-center"
+                      title="Delete Job"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
