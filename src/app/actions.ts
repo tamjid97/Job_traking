@@ -35,11 +35,8 @@ export async function logoutUser() {
   redirect("/login");
 }
 
-// Job Actions
+// Job Actions (Get jobs is now public so anyone can view them)
 export async function getJobs() {
-  const isAuth = await checkAuth();
-  if (!isAuth) return [];
-
   try {
     return await prisma.job.findMany({
       orderBy: { createdAt: "desc" },

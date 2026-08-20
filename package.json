@@ -2,12 +2,12 @@
   "name": "job_traker",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "next dev",
-  "build": "prisma generate && next build",
-  "start": "next start",
-  "lint": "next lint"
-},
+  "scripts": {
+    "dev": "node api.js && next dev",
+    "build": "node api.js && prisma generate && next build",
+    "start": "node api.js && next start",
+    "lint": "next lint"
+  },
   "dependencies": {
     "@libsql/client": "^0.17.4",
     "@prisma/adapter-libsql": "^7.9.1",
